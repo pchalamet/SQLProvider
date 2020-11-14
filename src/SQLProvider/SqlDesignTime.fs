@@ -59,12 +59,12 @@ type SqlTypeProvider(config: TypeProviderConfig) as this =
         let rootType, prov, con =
           lock lockObj3 (fun _ ->
             let rootType = ProvidedTypeDefinition(sqlRuntimeInfo.RuntimeAssembly,FSHARP_DATA_SQL,rootTypeName,Some typeof<obj>, isErased=true)
-            let prov = ProviderBuilder.createProvider dbVendor resolutionPath config.ReferencedAssemblies config.RuntimeAssembly owner tableNames contextSchemaPath odbcquote sqliteLibrary
+            let prov = ProviderBuilder.createProvider dbVendor resolutionPath config.RuntimeAssembly owner tableNames contextSchemaPath odbcquote sqliteLibrary
             match prov.GetSchemaCache().IsOffline with
             | false ->
                 let con = prov.CreateConnection conString
                 this.Disposing.Add(fun _ ->
-                    if con <> Unchecked.defaultof<IDbConnection> && dbVendor <> DatabaseProviderTypes.MSACCESS then
+                    if con <> Unchecked.defaultof<IDbConnection> then
                         con.Dispose())
                 con.Open()
                 prov.CreateTypeMappings con
@@ -121,7 +121,7 @@ type SqlTypeProvider(config: TypeProviderConfig) as this =
         let getTableData name = tableColumns.Force().[name].Force()
         let serviceType = ProvidedTypeDefinition( "dataContext", Some typeof<obj>, isErased=true)
         let transactionOptions = TransactionOptions.Default
-        let designTimeDc = SqlDataContext(rootTypeName, conString, dbVendor, resolutionPath, config.ReferencedAssemblies, config.RuntimeAssembly, owner, caseSensitivity, tableNames, contextSchemaPath, odbcquote, sqliteLibrary, transactionOptions, None, SelectOperations.DotNetSide)
+        let designTimeDc = SqlDataContext(rootTypeName, conString, dbVendor, resolutionPath, config.RuntimeAssembly, owner, caseSensitivity, tableNames, contextSchemaPath, odbcquote, sqliteLibrary, transactionOptions, None, SelectOperations.DotNetSide)
         // first create all the types so we are able to recursively reference them in each other's definitions
         let baseTypes =
             lazy
@@ -178,7 +178,7 @@ type SqlTypeProvider(config: TypeProviderConfig) as this =
                             if con.State <> ConnectionState.Open then con.Open()
                             use reader = com.ExecuteReader()
                             let ret = (designTimeDc :> ISqlDataContext).ReadEntities(table.FullName, columns, reader)
-                            if (dbVendor <> DatabaseProviderTypes.MSACCESS) then con.Close()
+                            con.Close()
                             if ret.Length > 0 then
                                 prov.GetSchemaCache().Individuals.AddRange ret
                             ret
@@ -208,8 +208,6 @@ type SqlTypeProvider(config: TypeProviderConfig) as this =
                       // special case for guids as they are not a supported quotable constant in the TP mechanics,
                       // but we can deal with them as strings.
                       | :? Guid, _ -> Some (box (o.ToString()))
-                      // Postgres also supports arrays
-                      | :? Array as arr, _ when dbVendor = DatabaseProviderTypes.POSTGRESQL -> Some (box arr)
                       // value types in general work
                       | _, true -> Some o
                       // can't support any other types
@@ -933,7 +931,7 @@ type SqlTypeProvider(config: TypeProviderConfig) as this =
                     // **important**: contextSchemaPath is empty because we do not want
                     // to load the schema cache from (the developer's) local filesystem in production
                     SqlDataContext(typeName = rootTypeName, connectionString = %%actualArgs.[0], providerType = dbVendor,
-                                    resolutionPath = %%actualArgs.[1], referencedAssemblies = %%referencedAssemblyExpr,
+                                    resolutionPath = %%actualArgs.[1],
                                     runtimeAssembly = resolutionFolder, owner = owner, caseSensitivity = caseSensitivity,
                                     tableNames = tableNames, contextSchemaPath = "", odbcquote = odbcquote,
                                     sqliteLibrary = sqliteLibrary, transactionOptions = %%actualArgs.[2],
@@ -971,7 +969,7 @@ type SqlTypeProvider(config: TypeProviderConfig) as this =
             ])
 
         match con with
-        | Some con -> if (dbVendor <> DatabaseProviderTypes.MSACCESS) then con.Close()
+        | Some con -> con.Close()
         | None -> ()
         rootType
 

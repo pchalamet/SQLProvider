@@ -1,7 +1,7 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFrameworks>net472;netcoreapp2.0;netstandard2.0</TargetFrameworks>
+    <TargetFrameworks>netstandard2.1</TargetFrameworks>
     <DefineConstants>NETSTANDARD;NO_GENERATIVE</DefineConstants>
     <AllowCrossTargeting>true</AllowCrossTargeting>
     <OutputPath>..\..\bin</OutputPath>
@@ -49,30 +49,6 @@
     <Compile Include="..\SQLProvider\Providers.MsSqlServer.fs">
       <Link>Providers.MsSqlServer.fs</Link>
     </Compile>
-    <Compile Include="..\SQLProvider\Providers.MsSqlServer.Dynamic.fs">
-      <Link>Providers.MsSqlServer.Dynamic.fs</Link>
-    </Compile>
-    <Compile Include="..\SQLProvider\Providers.MSAccess.fs">
-      <Link>Providers.MSAccess.fs</Link>
-    </Compile>
-    <Compile Include="..\SQLProvider\Providers.MySql.fs">
-      <Link>Providers.MySql.fs</Link>
-    </Compile>
-    <Compile Include="..\SQLProvider\Providers.Odbc.fs">
-      <Link>Providers.Odbc.fs</Link>
-    </Compile>
-    <Compile Include="..\SQLProvider\Providers.Oracle.fs">
-      <Link>Providers.Oracle.fs</Link>
-    </Compile>
-    <Compile Include="..\SQLProvider\Providers.Postgresql.fs">
-      <Link>Providers.Postgresql.fs</Link>
-    </Compile>
-    <Compile Include="..\SQLProvider\Providers.SQLite.fs">
-      <Link>Providers.SQLite.fs</Link>
-    </Compile>
-    <Compile Include="..\SQLProvider\Providers.Firebird.fs">
-      <Link>Providers.Firebird.fs</Link>
-    </Compile>
     <Compile Include="..\SQLProvider\SqlRuntime.QueryExpression.fs">
       <Link>SqlRuntime.QueryExpression.fs</Link>
     </Compile>
@@ -92,36 +68,23 @@
       <Link>SqlDesignTime.fs</Link>
     </Compile>
   </ItemGroup>
-  <ItemGroup Condition="'$(TargetFramework)' == 'net461' Or '$(TargetFramework)' == 'net472'">
-    <Reference Include="mscorlib" />
-    <Reference Include="System" />
-    <Reference Include="System.Configuration" />
-    <Reference Include="System.Core" />
-    <Reference Include="System.Data" />
-    <Reference Include="System.Data.Odbc" />
-    <Reference Include="System.Data.DataSetExtensions" />
-    <Reference Include="System.IdentityModel" />
-    <Reference Include="System.ServiceModel" />
-    <Reference Include="System.Transactions" />
-    <Reference Include="System.Xml" />
-  </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Microsoft.Data.Sqlite" Version="3.1.1" />
+    <!--<PackageReference Include="Microsoft.Data.Sqlite" Version="3.1.1" />
     <PackageReference Include="SQLitePCLRaw.bundle_green" Version="2.0.2" />
     <PackageReference Include="System.Runtime" Version="4.3.1" />
     <PackageReference Include="FSharp.Core" Version="4.5.4" />
     <PackageReference Include="System.Runtime.Loader" Version="4.3.0" />
     <PackageReference Include="System.Runtime.Serialization.Primitives" Version="4.3.0" />
-    <PackageReference Include="System.Runtime.Serialization.Formatters" Version="4.3.0" />
+    <PackageReference Include="System.Runtime.Serialization.Formatters" Version="4.3.0" />-->
   </ItemGroup>
   <ItemGroup Condition="'$(TargetFramework)' != 'net461' And '$(TargetFramework)' != 'net472'">
-    <PackageReference Include="System.IO" Version="4.3.0" />
+    <!--<PackageReference Include="System.IO" Version="4.3.0" />
     <PackageReference Include="System.Console" Version="4.3.1" />
     <PackageReference Include="System.Reflection" Version="4.3.0" />
     <PackageReference Include="System.Data.OleDb" Version="4.7.0" />
     <PackageReference Include="System.Reflection.TypeExtensions" Version="4.7.0" />
-    <PackageReference Include="System.Data.SqlClient" Version="4.8.0" />
+    <PackageReference Include="Microsoft.Data.SqlClient" Version="2.0.1" />-->
   </ItemGroup>
   <!--Import Project="..\..\.paket\Paket.Restore.targets" /-->
-  <Import Project="..\..\.paket\Paket.Restore.targets" />
+  <!--<Import Project="..\..\.paket\Paket.Restore.targets" />-->
 </Project>

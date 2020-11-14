@@ -200,7 +200,7 @@ module internal QueryImplementation =
         use reader = cmd.ExecuteReader()
         let results = dc.ReadEntities(baseTable.FullName, columns, reader)
         let results = parseQueryResults projector results (sqlExp.hasGroupBy())
-        if (provider.GetType() <> typeof<Providers.MSAccessProvider>) then con.Close() //else get 'COM object that has been separated from its underlying RCW cannot be used.'
+        con.Close() //else get 'COM object that has been separated from its underlying RCW cannot be used.'
         results
 
     let executeQueryAsync (dc:ISqlDataContext) (provider:ISqlProvider) sqlExp ti =
@@ -217,12 +217,12 @@ module internal QueryImplementation =
            if con.State <> ConnectionState.Open then
                 do! con.OpenAsync() |> Async.AwaitIAsyncResult |> Async.Ignore
            if (con.State <> ConnectionState.Open) then // Just ensure, as not all the providers seems to work so great with OpenAsync.
-                if (con.State <> ConnectionState.Closed) && (provider.GetType() <> typeof<Providers.MSAccessProvider>) then con.Close()
+                if (con.State <> ConnectionState.Closed) then con.Close()
                 con.Open()
            use! reader = cmd.ExecuteReaderAsync() |> Async.AwaitTask
            let! results = dc.ReadEntitiesAsync(baseTable.FullName, columns, reader)
            let results = parseQueryResults projector results (sqlExp.hasGroupBy())
-           if (provider.GetType() <> typeof<Providers.MSAccessProvider>) then con.Close() //else get 'COM object that has been separated from its underlying RCW cannot be used.'
+           con.Close() //else get 'COM object that has been separated from its underlying RCW cannot be used.'
            return results
        }
 
@@ -238,7 +238,7 @@ module internal QueryImplementation =
        // ignore any generated projection and just expect a single integer back
        if con.State <> ConnectionState.Open then con.Open()
        let result = cmd.ExecuteScalar()
-       if (provider.GetType() <> typeof<Providers.MSAccessProvider>) then con.Close() //else get 'COM object that has been separated from its underlying RCW cannot be used.'
+       con.Close() //else get 'COM object that has been separated from its underlying RCW cannot be used.'
        result
 
     let executeQueryScalarAsync (dc:ISqlDataContext) (provider:ISqlProvider) sqlExp ti =
@@ -255,10 +255,10 @@ module internal QueryImplementation =
            if con.State <> ConnectionState.Open then
                 do! con.OpenAsync() |> Async.AwaitIAsyncResult |> Async.Ignore
            if (con.State <> ConnectionState.Open) then // Just ensure, as not all the providers seems to work so great with OpenAsync.
-                if (con.State <> ConnectionState.Closed) && (provider.GetType() <> typeof<Providers.MSAccessProvider>) then con.Close()
+                if (con.State <> ConnectionState.Closed) then con.Close()
                 con.Open()
            let! executed = cmd.ExecuteScalarAsync() |> Async.AwaitTask
-           if (provider.GetType() <> typeof<Providers.MSAccessProvider>) then con.Close() //else get 'COM object that has been separated from its underlying RCW cannot be used.'
+           con.Close() //else get 'COM object that has been separated from its underlying RCW cannot be used.'
            return executed
        }
 
@@ -287,10 +287,10 @@ module internal QueryImplementation =
            if con.State <> ConnectionState.Open then
                 do! con.OpenAsync() |> Async.AwaitIAsyncResult |> Async.Ignore
            if (con.State <> ConnectionState.Open) then // Just ensure, as not all the providers seems to work so great with OpenAsync.
-                if (con.State <> ConnectionState.Closed) && (provider.GetType() <> typeof<Providers.MSAccessProvider>) then con.Close()
+                if (con.State <> ConnectionState.Closed) then con.Close()
                 con.Open()
            let! executed = cmd.ExecuteScalarAsync() |> Async.AwaitTask
-           if (provider.GetType() <> typeof<Providers.MSAccessProvider>) then con.Close() //else get 'COM object that has been separated from its underlying RCW cannot be used.'
+           con.Close() //else get 'COM object that has been separated from its underlying RCW cannot be used.'
            return executed
        }
 

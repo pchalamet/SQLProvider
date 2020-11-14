@@ -13,21 +13,12 @@ open System.Collections.Concurrent
 module internal ProviderBuilder =
     open FSharp.Data.Sql.Providers
 
-    let createProvider vendor resolutionPath referencedAssemblies runtimeAssembly owner tableNames contextSchemaPath odbcquote sqliteLibrary =
-        let referencedAssemblies = Array.append [|runtimeAssembly|] referencedAssemblies
+    let createProvider vendor resolutionPath runtimeAssembly owner tableNames contextSchemaPath odbcquote sqliteLibrary =
         match vendor with
         | DatabaseProviderTypes.MSSQLSERVER -> MSSqlServerProvider(contextSchemaPath, tableNames) :> ISqlProvider
-        | DatabaseProviderTypes.MSSQLSERVER_DYNAMIC -> MSSqlServerDynamicProvider(resolutionPath, contextSchemaPath, referencedAssemblies, tableNames) :> ISqlProvider
-        | DatabaseProviderTypes.SQLITE -> SQLiteProvider(resolutionPath, contextSchemaPath, referencedAssemblies, runtimeAssembly, sqliteLibrary) :> ISqlProvider
-        | DatabaseProviderTypes.POSTGRESQL -> PostgresqlProvider(resolutionPath, contextSchemaPath, owner, referencedAssemblies) :> ISqlProvider
-        | DatabaseProviderTypes.MYSQL -> MySqlProvider(resolutionPath, contextSchemaPath, owner, referencedAssemblies) :> ISqlProvider
-        | DatabaseProviderTypes.ORACLE -> OracleProvider(resolutionPath, contextSchemaPath, owner, referencedAssemblies, tableNames) :> ISqlProvider
-        | DatabaseProviderTypes.MSACCESS -> MSAccessProvider(contextSchemaPath) :> ISqlProvider
-        | DatabaseProviderTypes.ODBC -> OdbcProvider(contextSchemaPath, odbcquote) :> ISqlProvider
-        | DatabaseProviderTypes.FIREBIRD -> FirebirdProvider(resolutionPath, contextSchemaPath, owner, referencedAssemblies, odbcquote) :> ISqlProvider
         | _ -> failwith ("Unsupported database provider: " + vendor.ToString())
 
-type public SqlDataContext (typeName, connectionString:string, providerType, resolutionPath, referencedAssemblies, runtimeAssembly, owner, caseSensitivity, tableNames, contextSchemaPath, odbcquote, sqliteLibrary, transactionOptions, commandTimeout:Option<int>, sqlOperationsInSelect) =
+type public SqlDataContext (typeName, connectionString:string, providerType, resolutionPath, runtimeAssembly, owner, caseSensitivity, tableNames, contextSchemaPath, odbcquote, sqliteLibrary, transactionOptions, commandTimeout:Option<int>, sqlOperationsInSelect) =
     let pendingChanges = System.Collections.Concurrent.ConcurrentDictionary<SqlEntity, DateTime>()
     static let providerCache = ConcurrentDictionary<string,Lazy<ISqlProvider>>()
     let myLock2 = new Object();
@@ -35,7 +26,7 @@ type public SqlDataContext (typeName, connectionString:string, providerType, res
     let provider =
         let addCache() =
             lazy
-                let prov : ISqlProvider = ProviderBuilder.createProvider providerType resolutionPath referencedAssemblies runtimeAssembly owner tableNames contextSchemaPath odbcquote sqliteLibrary
+                let prov : ISqlProvider = ProviderBuilder.createProvider providerType resolutionPath runtimeAssembly owner tableNames contextSchemaPath odbcquote sqliteLibrary
                 if not (prov.GetSchemaCache().IsOffline) then
                     use con = prov.CreateConnection(connectionString)
                     con.Open()
@@ -43,7 +34,7 @@ type public SqlDataContext (typeName, connectionString:string, providerType, res
                     // the minimum base set of data available
                     prov.CreateTypeMappings(con)
                     prov.GetTables(con,caseSensitivity) |> ignore
-                    if (providerType <> DatabaseProviderTypes.MSACCESS && providerType.GetType() <> typeof<Providers.MSAccessProvider>) then con.Close()
+                    con.Close()
                 prov
         try providerCache.GetOrAdd(typeName, fun _ -> addCache()).Value
         with | _ -> providerCache.AddOrUpdate(typeName, addCache(), fun _ _ -> addCache()).Value
@@ -51,8 +42,7 @@ type public SqlDataContext (typeName, connectionString:string, providerType, res
 
     let initCallSproc (dc:ISqlDataContext) (def:RunTimeSprocDefinition) (values:obj array) (con:IDbConnection) (com:IDbCommand) =
         
-        if (providerType <> DatabaseProviderTypes.SQLITE) then 
-            com.CommandType <- CommandType.StoredProcedure
+        com.CommandType <- CommandType.StoredProcedure
 
         let columns =
             def.Params
@@ -153,7 +143,7 @@ type public SqlDataContext (typeName, connectionString:string, providerType, res
                             entity.SetColumnSilent(name, data)
                     entity |> box
 
-            if (provider.GetType() <> typeof<Providers.MSAccessProvider>) then con.Close()
+            con.Close()
             entities
 
         member this.CallSprocAsync(def:RunTimeSprocDefinition, retCols:QueryParameter[], values:obj array) =
@@ -184,10 +174,10 @@ type public SqlDataContext (typeName, connectionString:string, providerType, res
                                     let data = toEntityArray rs
                                     entity.SetColumnSilent(name, data)
 
-                            if (provider.GetType() <> typeof<Providers.MSAccessProvider>) then con.Close()
+                            con.Close()
                             entity
                     | Choice2Of2 err ->
-                        if (provider.GetType() <> typeof<Providers.MSAccessProvider>) then con.Close()
+                        con.Close()
                         raise err
 
                 return entities
@@ -214,7 +204,7 @@ type public SqlDataContext (typeName, connectionString:string, providerType, res
             if con.State <> ConnectionState.Open then con.Open()
             use reader = com.ExecuteReader()
             let entity = (this :> ISqlDataContext).ReadEntities(table.FullName, columns, reader) |> Seq.exactlyOne
-            if (provider.GetType() <> typeof<Providers.MSAccessProvider>) then con.Close()
+            con.Close()
             entity
 
         member this.ReadEntities(name: string, columns: ColumnLookup, reader: IDataReader) =
