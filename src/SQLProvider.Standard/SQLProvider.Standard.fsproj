@@ -13,15 +13,9 @@
     <Compile Include="..\SQLProvider\AssemblyInfo.fs">
       <Link>AssemblyInfo.fs</Link>
     </Compile>
-    <Compile Include="..\..\paket-files\sourcefiles\fsprojects\FSharp.TypeProviders.SDK\src\ProvidedTypes.fsi">
-      <Link>ProvidedTypes.fsi</Link>
-    </Compile>
-    <Compile Include="..\..\paket-files\sourcefiles\fsprojects\FSharp.TypeProviders.SDK\src\ProvidedTypes.fs">
-      <Link>ProvidedTypes.fs</Link>
-    </Compile>
-    <Compile Include="..\..\paket-files\sourcefiles\Thorium\Linq.Expression.Optimizer\src\Code\ExpressionOptimizer.fs">
-      <Link>ExpressionOptimizer.fs</Link>
-    </Compile>
+    <Compile Include="ProvidedTypes.fsi" />
+    <Compile Include="ProvidedTypes.fs" />
+    <Compile Include="ExpressionOptimizer.fs" />
     <Compile Include="..\SQLProvider\Operators.fs">
       <Link>Operators.fs</Link>
     </Compile>
@@ -69,6 +63,9 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
+    <PackageReference Include="Microsoft.Data.SqlClient" Version="2.0.1" />
+  </ItemGroup>
+
     <!--<PackageReference Include="Microsoft.Data.Sqlite" Version="3.1.1" />
     <PackageReference Include="SQLitePCLRaw.bundle_green" Version="2.0.2" />
     <PackageReference Include="System.Runtime" Version="4.3.1" />
@@ -76,15 +73,12 @@
     <PackageReference Include="System.Runtime.Loader" Version="4.3.0" />
     <PackageReference Include="System.Runtime.Serialization.Primitives" Version="4.3.0" />
     <PackageReference Include="System.Runtime.Serialization.Formatters" Version="4.3.0" />-->
-  </ItemGroup>
-  <ItemGroup Condition="'$(TargetFramework)' != 'net461' And '$(TargetFramework)' != 'net472'">
     <!--<PackageReference Include="System.IO" Version="4.3.0" />
     <PackageReference Include="System.Console" Version="4.3.1" />
     <PackageReference Include="System.Reflection" Version="4.3.0" />
     <PackageReference Include="System.Data.OleDb" Version="4.7.0" />
     <PackageReference Include="System.Reflection.TypeExtensions" Version="4.7.0" />
     <PackageReference Include="Microsoft.Data.SqlClient" Version="2.0.1" />-->
-  </ItemGroup>
   <!--Import Project="..\..\.paket\Paket.Restore.targets" /-->
   <!--<Import Project="..\..\.paket\Paket.Restore.targets" />-->
 </Project>
